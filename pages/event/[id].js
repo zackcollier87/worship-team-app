@@ -70,15 +70,19 @@ export default function EventPage() {
 
   // Create a brand-new song and link it to the event.
   const addNewSong = async () => {
-    if (!newSongTitle || !newSongYoutube || !newSongFile || !event) return;
+    if (!newSongTitle || !event) return;
     setUploading(true);
     try {
-      const tempRef = ref(storage, `songs/${Date.now()}_${newSongFile.name}`);
-      await uploadBytes(tempRef, newSongFile);
-      const pdfUrl = await getDownloadURL(tempRef);
+      let pdfUrl = '';
+      if (newSongFile) {
+        const tempRef = ref(storage, `songs/${Date.now()}_${newSongFile.name}`);
+        await uploadBytes(tempRef, newSongFile);
+        pdfUrl = await getDownloadURL(tempRef);
+      }
+      const youtubeUrlValue = newSongYoutube.trim() || '';
       const songDoc = await addDoc(collection(db, 'songs'), {
         title: newSongTitle.trim(),
-        youtubeUrl: newSongYoutube.trim(),
+        youtubeUrl: youtubeUrlValue,
         pdfUrl,
       });
       await addSongToEvent(songDoc.id);
